@@ -94,11 +94,23 @@ class Ui_SearchWindow(object):
         self.label_9.setText(_translate("SearchWindow", "~"))
         self.searchButton.setText(_translate("SearchWindow", "Search"))
         self.backButton.setText(_translate("SearchWindow", "Back"))
+        # Add options to the combo box
+        self.transactio_input.addItem("Send")
+        self.transactio_input.addItem("Request")
 
 
 class SearchMenu(Ui_SearchWindow):
-    def __init__(self, username):
+    def __init__(self, username, db_conn):
         super(SearchMenu, self).__init__()
         self.searchwindow=QMainWindow()
         self.setupUi(self.searchwindow)
         self.usernameLabel.setText(username)
+        self.conn = db_conn
+        # 绑定按钮点击后调用的函数
+        self.searchButton.clicked.connect(self.searchFun)
+
+
+    def searchFun(self):
+        # 根据各个文本框的数据作为限制条件来查询
+        # 可能要学习一下怎么读取QDateEdit对象的日期数据
+        print("searchFun")

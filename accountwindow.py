@@ -124,8 +124,55 @@ class Ui_AccountWindow(object):
 
 
 class AccountMenu(Ui_AccountWindow):
-    def __init__(self, username):
+    def __init__(self, username, db_conn):
         super(AccountMenu, self).__init__()
         self.accountwindow=QMainWindow()
         self.setupUi(self.accountwindow)
         self.v_username.setText(username)
+        self.conn = db_conn
+        # 绑定按钮点击后调用的函数
+        self.editnameButton.clicked.connect(self.editNameFun)
+        self.editssnButton.clicked.connect(self.editSSNFun)
+        self.addphoneButton.clicked.connect(self.addPhoneFun)
+        self.removephoneButton.clicked.connect(self.removePhoneFun)
+        self.addemailButton.clicked.connect(self.addEmailFun)
+        self.removeemailButton.clicked.connect(self.removeEmailFun)
+        self.addbankButton.clicked.connect(self.addBankFuc)
+        self.removebankButton.clicked.connect(self.removeBankFun)
+
+
+    # 在下面编写按钮点击处理逻辑
+    def editNameFun(self):
+        value = self.usernameInput.text()
+        print("editNameFun")
+
+
+    def editSSNFun(self):
+        value = self.ssn_input.text()
+        print("editSSNFun")
+
+
+    def addPhoneFun(self):
+        # 这里可能还需要学习一下怎么读写pyqt5里面的QListWidget对象，邮件电话银行账户存在列表形式里
+        value = self.email_input.text()
+        print("addPhoneFun")
+
+
+    def removePhoneFun(self):
+        print("removePhoneFun")
+
+
+    def addEmailFun(self):
+        print("addEmailFun")
+
+
+    def removeEmailFun(self):
+        print("removeEmailFun")
+
+
+    def addBankFuc(self):
+        print("addBankFuc")
+
+
+    def removeBankFun(self):
+        print("removeBankFun")

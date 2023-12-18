@@ -91,8 +91,31 @@ class Ui_MainWindow(object):
 
 
 class MainMenu(Ui_MainWindow):
-    def __init__(self, username):
+    def __init__(self, username, db_conn):
         super(MainMenu, self).__init__()
         self.mainwindow=QMainWindow()
         self.setupUi(self.mainwindow)
         self.label_2.setText(username)
+        self.conn = db_conn
+        # 绑定按钮点击后调用的函数
+        self.sendButton.clicked.connect(self.sendMoneyFun)
+        self.requestButton.clicked.connect(self.requestMoneyFun)
+
+    # 在下面编写按钮点击处理逻辑
+    def sendMoneyFun(self):
+        # 获取文本输入框的值 输入文本框是QLineEdit对象
+        people = self.sendPhone.text()
+        money = self.sendMoney.text()
+        print(people)
+        print(money)
+        # 读取数据, call conn.commit() if make any changes to the database
+        cursor = self.conn.cursor()
+        # cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+
+        # conn.commit()  # 如果是写数据库的话记得调用这个
+        print("sendMoney")
+
+
+    def requestMoneyFun(self):
+
+        print("requestMoney")

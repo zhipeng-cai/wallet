@@ -36,7 +36,7 @@ class Ui_StatementWindow(object):
         self.label_4.setGeometry(QtCore.QRect(175, 132, 15, 17))
         self.label_4.setObjectName("label_4")
         self.answer1 = QtWidgets.QLabel(self.centralwidget)
-        self.answer1.setGeometry(QtCore.QRect(340, 133, 331, 17))
+        self.answer1.setGeometry(QtCore.QRect(380, 133, 331, 17))
         self.answer1.setObjectName("answer1")
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
         self.label_6.setGeometry(QtCore.QRect(80, 190, 521, 17))
@@ -59,6 +59,9 @@ class Ui_StatementWindow(object):
         self.backButton = QtWidgets.QPushButton(self.centralwidget)
         self.backButton.setGeometry(QtCore.QRect(730, 520, 61, 25))
         self.backButton.setObjectName("backButton")
+        self.searchButton = QtWidgets.QPushButton(self.centralwidget)
+        self.searchButton.setGeometry(QtCore.QRect(300, 131, 61, 25))
+        self.searchButton.setObjectName("searchButton")
         StatementWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(StatementWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 28))
@@ -85,11 +88,20 @@ class Ui_StatementWindow(object):
         self.label_9.setText(_translate("StatementWindow", "4. The best users (users who have sent/received the maximum total amount of money):"))
         self.answer4.setText(_translate("StatementWindow", "no result"))
         self.backButton.setText(_translate("StatementWindow", "Back"))
+        self.searchButton.setText(_translate("StatementWindow", "Search"))
 
 
 class StatementMenu(Ui_StatementWindow):
-    def __init__(self, username):
+    def __init__(self, username, db_conn):
         super(StatementMenu, self).__init__()
         self.statementwindow=QMainWindow()
         self.setupUi(self.statementwindow)
         self.usernameLabel.setText(username)
+        self.conn = db_conn
+        # 绑定按钮点击后调用的函数
+        self.searchButton.clicked.connect(self.searchFun)
+        # 这个页面还有很多不用点击按钮触发的数据库读写逻辑，需要页面一加载出来就把读取到的指标显示在对应的Label组件上，分别是answe1, answer2, answer3, answer4
+
+
+    def searchFun(self):
+        print("searchFun")
