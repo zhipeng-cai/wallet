@@ -24,7 +24,21 @@ class Main():
     def logining(self):
         self.username = self.login_menu.usernameInput.text()
         self.password = self.login_menu.passwordInput.text()
-        self.main_menu = MainMenu(self.username, self.conn)
+
+        cursor = self.conn.cursor()
+        login = '''
+            SELECT UserID from User 
+            WHERE Name = ? and SSN = ?
+        '''
+        cursor.execute(login, [self.username, self.password])
+        uid = cursor.fetchall()
+        if(len(uid) == 0):
+            print('login failed')
+            #ZHANGXIHAO 改成在页面上显示登录失败
+            return
+        self.userId = uid[0][0]
+
+        self.main_menu = MainMenu(self.userId, self.conn)
         self.main_menu.accountButton.clicked.connect(self.toAccountPage)
         self.main_menu.statementButton.clicked.connect(self.toStatementPage)
         self.main_menu.transactionButton.clicked.connect(self.toSearchPage)
@@ -42,7 +56,7 @@ class Main():
         self.login_menu.loginwindow.show()
 
     def toAccountPage(self):
-        self.account_menu = AccountMenu(self.username, self.conn)
+        self.account_menu = AccountMenu(self.userId, self.conn)
         self.account_menu.backButton.clicked.connect(self.backFromAccount)
 
         self.main_menu.mainwindow.close()
