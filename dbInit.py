@@ -3,45 +3,82 @@
 def create_tables(conn):
     cursor = conn.cursor()
     # SQL statements to create tables
-    users_table = '''
-    CREATE TABLE IF NOT EXISTS users (
-        username VARCHAR(255) PRIMARY KEY,
-        password VARCHAR(255)
-        -- Add other columns as needed
-        -- For example: first_name VARCHAR(255), last_name VARCHAR(255), etc.
+    # Create User table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS User (
+        UserID INTEGER PRIMARY KEY autoincrement,
+        Name TEXT,
+        SSN TEXT
     );
-    '''
+    ''')
 
-    account_table = '''
-    CREATE TABLE IF NOT EXISTS account (
-        username VARCHAR(255) PRIMARY KEY,
-        ssn VARCHAR(20),
-        email VARCHAR(255),
-        phone_number VARCHAR(20),
-        bank VARCHAR(255)
-        -- Add other columns as needed
-        -- For example: balance DECIMAL(10, 2), last_login TIMESTAMP, etc.
+    # Create Email table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Email (
+        EmailID INTEGER PRIMARY KEY autoincrement,
+        UserID INTEGER,
+        Address TEXT,
+        IsVerified INTEGER,
+        FOREIGN KEY(UserID) REFERENCES User(UserID)
     );
-    '''
+    ''')
 
-    transactions_table = '''
-    CREATE TABLE IF NOT EXISTS transactions (
-        transaction_id INTEGER PRIMARY KEY,
-        sender_username VARCHAR(255),
-        receiver_username VARCHAR(255),
-        date DATE,
-        time TIME,
-        transaction_type VARCHAR(20),
-        money_amount DECIMAL(10, 2)
-        -- Add other columns as needed
-        -- For example: description VARCHAR(255), status VARCHAR(20), etc.
+    # Create Phone table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Phone (
+        PhoneID INTEGER PRIMARY KEY autoincrement, 
+        UserID INTEGER,
+        Number INTEGER,
+        IsVerified INTEGER,
+        FOREIGN KEY (UserID) REFERENCES User(UserID)
     );
-    '''
+    ''')
 
-    # Execute SQL statements
-    cursor.execute(users_table)
-    cursor.execute(account_table)
-    cursor.execute(transactions_table)
+    # Create BankAccount table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS BankAccount (
+        AccountNumber INTEGER PRIMARY KEY,
+        IsVerified INTEGER
+    );
+    ''')
+
+    # Create UBRelation table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS UBRelation (
+        UBRelationID INTEGER PRIMARY KEY autoincrement,
+        UserID INTEGER,
+        AccountNumber INTEGER,
+        FOREIGN KEY (UserID) REFERENCES User(UserID),
+        FOREIGN KEY (AccountNumber) REFERENCES BankAccount(AccountNumber)
+    );
+    ''')
+
+    # Create Transaction table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Transactions (
+        TransactionID INTEGER PRIMARY KEY autoincrement,
+        Typo TEXT,
+        TotalAmount DOUBLE 
+    );
+    ''')
+
+    # Create Payment table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Payment (
+        PaymentID INTEGER PRIMARY KEY autoincrement,
+        SenderUserID INTEGER,
+        ReceiverUserID INTEGER,
+        TransactionID INTEGER,
+        Amount DOUBLE,
+        Memo TEXT,
+        BeginDate TEXT,
+        EndDate TEXT,
+        IsSuccessful INTEGER,
+        FOREIGN KEY (SenderUserID) REFERENCES User(UserID),
+        FOREIGN KEY (ReceiverUserID) REFERENCES User(UserID),
+        FOREIGN KEY (TransactionID) REFERENCES Transactions(TransactionID)
+    );
+    ''')
 
     # Commit the changes and close the connection
     conn.commit()
@@ -50,5 +87,10 @@ def create_tables(conn):
 
 # TODO 插入初始数据
 def insert_init_data(conn):
-    pass
-
+    cursor = conn.cursor()
+    users_add = '''
+    INSERT OR IGNORE INTO User 
+    VALUES (1, 'bro', '1234')
+    '''
+    cursor.execute(users_add)
+    conn.commit()

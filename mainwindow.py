@@ -91,12 +91,20 @@ class Ui_MainWindow(object):
 
 
 class MainMenu(Ui_MainWindow):
-    def __init__(self, username, db_conn):
+    def __init__(self, userId, db_conn):
         super(MainMenu, self).__init__()
+        self.userId = userId
         self.mainwindow=QMainWindow()
         self.setupUi(self.mainwindow)
-        self.label_2.setText(username)
         self.conn = db_conn
+        cursor = self.conn.cursor()
+        login = '''
+                    SELECT Name from User 
+                    WHERE UserID = ?
+                '''
+        cursor.execute(login, [self.userId])
+        uname = cursor.fetchall()
+        self.label_2.setText(uname[0][0])
         # 绑定按钮点击后调用的函数
         self.sendButton.clicked.connect(self.sendMoneyFun)
         self.requestButton.clicked.connect(self.requestMoneyFun)

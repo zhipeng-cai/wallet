@@ -124,12 +124,20 @@ class Ui_AccountWindow(object):
 
 
 class AccountMenu(Ui_AccountWindow):
-    def __init__(self, username, db_conn):
+    def __init__(self, userId, db_conn):
         super(AccountMenu, self).__init__()
+        self.userId = userId
         self.accountwindow=QMainWindow()
         self.setupUi(self.accountwindow)
-        self.v_username.setText(username)
         self.conn = db_conn
+        cursor = self.conn.cursor()
+        login = '''
+            SELECT Name from User 
+            WHERE UserID = ?
+        '''
+        cursor.execute(login, [self.userId])
+        uname = cursor.fetchall()
+        self.v_username.setText(uname[0][0])
         # 绑定按钮点击后调用的函数
         self.editnameButton.clicked.connect(self.editNameFun)
         self.editssnButton.clicked.connect(self.editSSNFun)
@@ -140,39 +148,127 @@ class AccountMenu(Ui_AccountWindow):
         self.addbankButton.clicked.connect(self.addBankFuc)
         self.removebankButton.clicked.connect(self.removeBankFun)
 
+        # 在这里查到电话、邮件、账号信息
+        cursor.execute('''
+                        SELECT Number FROM Phone
+                        WHERE UserID = ?
+                    ''', [self.userId])
+        uphone = cursor.fetchall()
+        print(uphone)
+        cursor.execute('''
+                                SELECT Address FROM Email
+                                WHERE UserID = ?
+                            ''', [self.userId])
+        uemail = cursor.fetchall()
+        print(uemail)
+        cursor.execute('''
+                                SELECT AccountNumber FROM UBRelation
+                                WHERE UserID = ?
+                            ''', [self.userId])
+        ubank = cursor.fetchall()
+        print(ubank)
+
 
     # 在下面编写按钮点击处理逻辑
     def editNameFun(self):
         value = self.usernameInput.text()
+        if(len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                UPDATE USER
+                SET Name = ?
+                WHERE UserID = ?
+            ''', [value, self.userId])
+            self.conn.commit()
         print("editNameFun")
 
 
     def editSSNFun(self):
         value = self.ssn_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                        UPDATE USER
+                        SET SSN = ?
+                        WHERE UserID = ?
+                    ''', [value, self.userId])
+            self.conn.commit()
         print("editSSNFun")
 
 
     def addPhoneFun(self):
         # 这里可能还需要学习一下怎么读写pyqt5里面的QListWidget对象，邮件电话银行账户存在列表形式里
-        value = self.email_input.text()
+        value = self.phone_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                        INSERT INTO Phone(UserID, Number, IsVerified)
+                        VALUES (?, ?, 0)
+                    ''', [self.userId, value])
+            self.conn.commit()
         print("addPhoneFun")
 
 
     def removePhoneFun(self):
+        value = self.phone_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                               DELETE FROM Phone
+                               WHERE UserID = ? and Number = ?
+                           ''', [self.userId, value])
+            self.conn.commit()
         print("removePhoneFun")
 
 
     def addEmailFun(self):
+        value = self.email_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                                INSERT INTO Email(UserID, Address, IsVerified)
+                                VALUES (?, ?, 0)
+                            ''', [self.userId, value])
+            self.conn.commit()
         print("addEmailFun")
 
 
     def removeEmailFun(self):
+        value = self.email_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                                       DELETE FROM Email
+                                       WHERE UserID = ? and Address = ?
+                                   ''', [self.userId, value])
+            self.conn.commit()
         print("removeEmailFun")
 
 
     def addBankFuc(self):
+        value = self.bank_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                            INSERT OR IGNORE INTO BankAccount(AccountNumber, IsVerified)
+                            VALUES (?, 0)
+                            ''', [value])
+            self.conn.commit()
+            cursor.execute('''
+                            INSERT INTO UBRelation(UserID, AccountNumber)
+                            VALUES (?, ?)
+                            ''', [self.userId, value])
+            self.conn.commit()
         print("addBankFuc")
 
 
     def removeBankFun(self):
+        value = self.bank_input.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                                               DELETE FROM UBRelation
+                                               WHERE UserID = ? and AccountNumber = ?
+                                           ''', [self.userId, value])
+            self.conn.commit()
         print("removeBankFun")
