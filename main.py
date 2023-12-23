@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import sqlite3
@@ -16,7 +18,10 @@ class Main():
         self.login_menu.loginwindow.show()
 
         # Connect to the SQLite database (this will create a new database file if it doesn't exist)
-        self.conn = sqlite3.connect('./db/data.db')  # 数据库连接，把这个变量传给其它需要使用数据库的函数
+        db_file_path = './db/data.db'
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
+        self.conn = sqlite3.connect(db_file_path)  # 数据库连接，把这个变量传给其它需要使用数据库的函数
         dbInit.create_tables(self.conn)
         dbInit.insert_init_data(self.conn)
 
@@ -28,7 +33,7 @@ class Main():
         cursor = self.conn.cursor()
         login = '''
             SELECT UserID from User 
-            WHERE Name = ? and SSN = ?
+            WHERE UserName = ? and SSN = ?
         '''
         cursor.execute(login, [self.username, self.password])
         uid = cursor.fetchall()

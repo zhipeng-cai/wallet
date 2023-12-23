@@ -132,7 +132,7 @@ class AccountMenu(Ui_AccountWindow):
         self.conn = db_conn
         cursor = self.conn.cursor()
         login = '''
-            SELECT Name from User 
+            SELECT UserName from User 
             WHERE UserID = ?
         '''
         cursor.execute(login, [self.userId])
@@ -176,7 +176,7 @@ class AccountMenu(Ui_AccountWindow):
             cursor = self.conn.cursor()
             cursor.execute('''
                 UPDATE USER
-                SET Name = ?
+                SET UserName = ?
                 WHERE UserID = ?
             ''', [value, self.userId])
             self.conn.commit()

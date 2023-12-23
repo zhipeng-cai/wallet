@@ -99,7 +99,7 @@ class MainMenu(Ui_MainWindow):
         self.conn = db_conn
         cursor = self.conn.cursor()
         login = '''
-                    SELECT Name from User 
+                    SELECT UserName from User 
                     WHERE UserID = ?
                 '''
         cursor.execute(login, [self.userId])
