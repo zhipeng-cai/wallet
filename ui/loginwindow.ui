@@ -62,14 +62,27 @@
   <widget class="QPushButton" name="loginButton">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>200</x>
      <y>190</y>
      <width>89</width>
      <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>Login</string>
+    <string>Log In</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="signupButton">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>190</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Sign Up</string>
    </property>
   </widget>
  </widget>

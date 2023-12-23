@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 
 class Ui_MainWindow(object):
@@ -96,6 +96,7 @@ class MainMenu(Ui_MainWindow):
         self.userId = userId
         self.mainwindow=QMainWindow()
         self.setupUi(self.mainwindow)
+        self.center_window()
         self.conn = db_conn
         cursor = self.conn.cursor()
         login = '''
@@ -108,6 +109,17 @@ class MainMenu(Ui_MainWindow):
         # 绑定按钮点击后调用的函数
         self.sendButton.clicked.connect(self.sendMoneyFun)
         self.requestButton.clicked.connect(self.requestMoneyFun)
+
+
+    def center_window(self):
+        desktop = QDesktopWidget()
+
+        screen_rect = desktop.screenGeometry()
+        x = (screen_rect.width() - self.mainwindow.width()) // 2
+        y = (screen_rect.height() - self.mainwindow.height()) // 2
+
+        self.mainwindow.move(x, y)
+
 
     # 在下面编写按钮点击处理逻辑
     def sendMoneyFun(self):

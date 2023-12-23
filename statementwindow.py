@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 
 class Ui_StatementWindow(object):
@@ -96,11 +96,22 @@ class StatementMenu(Ui_StatementWindow):
         super(StatementMenu, self).__init__()
         self.statementwindow=QMainWindow()
         self.setupUi(self.statementwindow)
+        self.center_window()
         self.usernameLabel.setText(username)
         self.conn = db_conn
         # 绑定按钮点击后调用的函数
         self.searchButton.clicked.connect(self.searchFun)
         # 这个页面还有很多不用点击按钮触发的数据库读写逻辑，需要页面一加载出来就把读取到的指标显示在对应的Label组件上，分别是answe1, answer2, answer3, answer4
+
+
+    def center_window(self):
+        desktop = QDesktopWidget()
+
+        screen_rect = desktop.screenGeometry()
+        x = (screen_rect.width() - self.statementwindow.width()) // 2
+        y = (screen_rect.height() - self.statementwindow.height()) // 2
+
+        self.statementwindow.move(x, y)
 
 
     def searchFun(self):

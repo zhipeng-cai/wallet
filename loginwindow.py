@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 
 class Ui_Form(object):
@@ -28,8 +28,11 @@ class Ui_Form(object):
         self.passwordInput.setGeometry(QtCore.QRect(180, 130, 113, 25))
         self.passwordInput.setObjectName("passwordInput")
         self.loginButton = QtWidgets.QPushButton(Form)
-        self.loginButton.setGeometry(QtCore.QRect(150, 190, 89, 25))
+        self.loginButton.setGeometry(QtCore.QRect(200, 190, 89, 25))
         self.loginButton.setObjectName("loginButton")
+        self.signupButton = QtWidgets.QPushButton(Form)
+        self.signupButton.setGeometry(QtCore.QRect(90, 190, 89, 25))
+        self.signupButton.setObjectName("signupButton")
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -39,7 +42,9 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.usernameLabel.setText(_translate("Form", "Username"))
         self.passwordLabel.setText(_translate("Form", "Password"))
-        self.loginButton.setText(_translate("Form", "Login"))
+        self.loginButton.setText(_translate("Form", "Log In"))
+        self.signupButton.setText(_translate("Form", "Sign Up"))
+
 
 
 class LoginMenu(Ui_Form):
@@ -47,3 +52,13 @@ class LoginMenu(Ui_Form):
         super(LoginMenu, self).__init__()
         self.loginwindow=QMainWindow()
         self.setupUi(self.loginwindow)
+        self.center_window()
+
+    def center_window(self):
+        desktop = QDesktopWidget()
+
+        screen_rect = desktop.screenGeometry()
+        x = (screen_rect.width() - self.loginwindow.width()) // 2
+        y = (screen_rect.height() - self.loginwindow.height()) // 2
+
+        self.loginwindow.move(x, y)

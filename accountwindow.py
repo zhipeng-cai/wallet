@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 
 class Ui_AccountWindow(object):
@@ -17,18 +17,18 @@ class Ui_AccountWindow(object):
         AccountWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(AccountWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.usernameLabel = QtWidgets.QLabel(self.centralwidget)
-        self.usernameLabel.setGeometry(QtCore.QRect(70, 60, 71, 17))
-        self.usernameLabel.setObjectName("usernameLabel")
-        self.v_username = QtWidgets.QLabel(self.centralwidget)
-        self.v_username.setGeometry(QtCore.QRect(190, 60, 111, 17))
-        self.v_username.setObjectName("v_username")
-        self.usernameInput = QtWidgets.QLineEdit(self.centralwidget)
-        self.usernameInput.setGeometry(QtCore.QRect(422, 60, 141, 25))
-        self.usernameInput.setObjectName("usernameInput")
-        self.editnameButton = QtWidgets.QPushButton(self.centralwidget)
-        self.editnameButton.setGeometry(QtCore.QRect(590, 60, 89, 25))
-        self.editnameButton.setObjectName("editnameButton")
+        self.passwordLabel = QtWidgets.QLabel(self.centralwidget)
+        self.passwordLabel.setGeometry(QtCore.QRect(70, 70, 71, 17))
+        self.passwordLabel.setObjectName("passwordLabel")
+        self.v_password = QtWidgets.QLabel(self.centralwidget)
+        self.v_password.setGeometry(QtCore.QRect(190, 70, 111, 17))
+        self.v_password.setObjectName("v_password")
+        self.passwordInput = QtWidgets.QLineEdit(self.centralwidget)
+        self.passwordInput.setGeometry(QtCore.QRect(420, 70, 141, 25))
+        self.passwordInput.setObjectName("passwordInput")
+        self.editpasswordButton = QtWidgets.QPushButton(self.centralwidget)
+        self.editpasswordButton.setGeometry(QtCore.QRect(590, 70, 111, 25))
+        self.editpasswordButton.setObjectName("editpasswordButton")
         self.ssnLabel = QtWidgets.QLabel(self.centralwidget)
         self.ssnLabel.setGeometry(QtCore.QRect(70, 120, 71, 20))
         self.ssnLabel.setObjectName("ssnLabel")
@@ -36,7 +36,7 @@ class Ui_AccountWindow(object):
         self.v_ssn.setGeometry(QtCore.QRect(190, 120, 111, 17))
         self.v_ssn.setObjectName("v_ssn")
         self.editssnButton = QtWidgets.QPushButton(self.centralwidget)
-        self.editssnButton.setGeometry(QtCore.QRect(590, 120, 89, 25))
+        self.editssnButton.setGeometry(QtCore.QRect(590, 120, 111, 25))
         self.editssnButton.setObjectName("editssnButton")
         self.phoneLabel = QtWidgets.QLabel(self.centralwidget)
         self.phoneLabel.setGeometry(QtCore.QRect(70, 170, 111, 20))
@@ -81,15 +81,42 @@ class Ui_AccountWindow(object):
         self.removebankButton = QtWidgets.QPushButton(self.centralwidget)
         self.removebankButton.setGeometry(QtCore.QRect(590, 480, 89, 25))
         self.removebankButton.setObjectName("removebankButton")
-        self.bank_input = QtWidgets.QLineEdit(self.centralwidget)
-        self.bank_input.setGeometry(QtCore.QRect(420, 440, 141, 25))
-        self.bank_input.setObjectName("bank_input")
+        self.banknumber_input = QtWidgets.QLineEdit(self.centralwidget)
+        self.banknumber_input.setGeometry(QtCore.QRect(420, 440, 141, 25))
+        self.banknumber_input.setObjectName("banknumber_input")
         self.addbankButton = QtWidgets.QPushButton(self.centralwidget)
         self.addbankButton.setGeometry(QtCore.QRect(590, 440, 89, 25))
         self.addbankButton.setObjectName("addbankButton")
         self.backButton = QtWidgets.QPushButton(self.centralwidget)
         self.backButton.setGeometry(QtCore.QRect(710, 520, 71, 25))
         self.backButton.setObjectName("backButton")
+        self.usernameLabel = QtWidgets.QLabel(self.centralwidget)
+        self.usernameLabel.setGeometry(QtCore.QRect(70, 20, 71, 17))
+        self.usernameLabel.setObjectName("usernameLabel")
+        self.usernameInput = QtWidgets.QLineEdit(self.centralwidget)
+        self.usernameInput.setGeometry(QtCore.QRect(420, 20, 141, 25))
+        self.usernameInput.setObjectName("usernameInput")
+        self.editnameButton = QtWidgets.QPushButton(self.centralwidget)
+        self.editnameButton.setGeometry(QtCore.QRect(590, 20, 111, 25))
+        self.editnameButton.setObjectName("editnameButton")
+        self.v_username = QtWidgets.QLabel(self.centralwidget)
+        self.v_username.setGeometry(QtCore.QRect(190, 20, 111, 17))
+        self.v_username.setObjectName("v_username")
+        self.bankbalance_input = QtWidgets.QLineEdit(self.centralwidget)
+        self.bankbalance_input.setGeometry(QtCore.QRect(420, 470, 141, 25))
+        self.bankbalance_input.setObjectName("bankbalance_input")
+        self.bankpriority_input = QtWidgets.QLineEdit(self.centralwidget)
+        self.bankpriority_input.setGeometry(QtCore.QRect(420, 500, 141, 25))
+        self.bankpriority_input.setObjectName("bankpriority_input")
+        self.banknumberLabel = QtWidgets.QLabel(self.centralwidget)
+        self.banknumberLabel.setGeometry(QtCore.QRect(360, 440, 67, 17))
+        self.banknumberLabel.setObjectName("banknumberLabel")
+        self.bankbalanceLabel = QtWidgets.QLabel(self.centralwidget)
+        self.bankbalanceLabel.setGeometry(QtCore.QRect(360, 470, 67, 17))
+        self.bankbalanceLabel.setObjectName("bankbalanceLabel")
+        self.bankpriorityLabel = QtWidgets.QLabel(self.centralwidget)
+        self.bankpriorityLabel.setGeometry(QtCore.QRect(360, 500, 67, 17))
+        self.bankpriorityLabel.setObjectName("bankpriorityLabel")
         AccountWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(AccountWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 28))
@@ -105,9 +132,9 @@ class Ui_AccountWindow(object):
     def retranslateUi(self, AccountWindow):
         _translate = QtCore.QCoreApplication.translate
         AccountWindow.setWindowTitle(_translate("AccountWindow", "MainWindow"))
-        self.usernameLabel.setText(_translate("AccountWindow", "Username:"))
-        self.v_username.setText(_translate("AccountWindow", "v_username"))
-        self.editnameButton.setText(_translate("AccountWindow", "Edit Name"))
+        self.passwordLabel.setText(_translate("AccountWindow", "Password:"))
+        self.v_password.setText(_translate("AccountWindow", "********"))
+        self.editpasswordButton.setText(_translate("AccountWindow", "Edit Password"))
         self.ssnLabel.setText(_translate("AccountWindow", "SSN:"))
         self.v_ssn.setText(_translate("AccountWindow", "v_ssn"))
         self.editssnButton.setText(_translate("AccountWindow", "Edit SSN"))
@@ -121,6 +148,12 @@ class Ui_AccountWindow(object):
         self.removebankButton.setText(_translate("AccountWindow", "Remove"))
         self.addbankButton.setText(_translate("AccountWindow", "Add"))
         self.backButton.setText(_translate("AccountWindow", "Back"))
+        self.usernameLabel.setText(_translate("AccountWindow", "Username:"))
+        self.editnameButton.setText(_translate("AccountWindow", "Edit Name"))
+        self.v_username.setText(_translate("AccountWindow", "v_username"))
+        self.banknumberLabel.setText(_translate("AccountWindow", "Number"))
+        self.bankbalanceLabel.setText(_translate("AccountWindow", "Balance"))
+        self.bankpriorityLabel.setText(_translate("AccountWindow", "Priority"))
 
 
 class AccountMenu(Ui_AccountWindow):
@@ -129,6 +162,7 @@ class AccountMenu(Ui_AccountWindow):
         self.userId = userId
         self.accountwindow=QMainWindow()
         self.setupUi(self.accountwindow)
+        self.center_window()
         self.conn = db_conn
         cursor = self.conn.cursor()
         login = '''
@@ -167,6 +201,16 @@ class AccountMenu(Ui_AccountWindow):
                             ''', [self.userId])
         ubank = cursor.fetchall()
         print(ubank)
+
+
+    def center_window(self):
+        desktop = QDesktopWidget()
+
+        screen_rect = desktop.screenGeometry()
+        x = (screen_rect.width() - self.accountwindow.width()) // 2
+        y = (screen_rect.height() - self.accountwindow.height()) // 2
+
+        self.accountwindow.move(x, y)
 
 
     # 在下面编写按钮点击处理逻辑
@@ -246,7 +290,7 @@ class AccountMenu(Ui_AccountWindow):
 
 
     def addBankFuc(self):
-        value = self.bank_input.text()
+        value = self.banknumber_input.text()
         if (len(value) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''

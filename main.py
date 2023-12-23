@@ -9,12 +9,14 @@ from mainwindow import MainMenu
 from accountwindow import AccountMenu
 from statementwindow import StatementMenu
 from searchwindow import SearchMenu
+from dialogutil import open_dialog
 
 
 class Main():
     def __init__(self):
         self.login_menu = LoginMenu(self)
         self.login_menu.loginButton.clicked.connect(self.logining)
+        self.login_menu.signupButton.clicked.connect(self.signup)
         self.login_menu.loginwindow.show()
 
         # Connect to the SQLite database (this will create a new database file if it doesn't exist)
@@ -33,13 +35,13 @@ class Main():
         cursor = self.conn.cursor()
         login = '''
             SELECT UserID from User 
-            WHERE UserName = ? and SSN = ?
+            WHERE UserName = ? and PassWord = ?
         '''
         cursor.execute(login, [self.username, self.password])
         uid = cursor.fetchall()
         if(len(uid) == 0):
             print('login failed')
-            #ZHANGXIHAO 改成在页面上显示登录失败
+            open_dialog("登录失败", 125, 50, 300, 200)
             return
         self.userId = uid[0][0]
 
@@ -51,6 +53,27 @@ class Main():
 
         self.login_menu.loginwindow.close()
         self.main_menu.mainwindow.show()
+
+
+    def signup(self):
+        self.username = self.login_menu.usernameInput.text()
+        self.password = self.login_menu.passwordInput.text()
+        if self.username != "" and self.password != "":
+            try:
+                cursor = self.conn.cursor()
+                cursor.execute('''
+                        INSERT INTO User (UserName, Password) VALUES (?, ?)
+                    ''', (self.username, self.password))
+                self.conn.commit()
+                print("Signup successful!")
+                open_dialog("注册成功", 125, 50, 300, 200)
+            except Exception as e:
+                print(f"Error during signup: {e}")
+                open_dialog("注册失败", 125, 50, 300, 200)
+        else:
+            print("Username and password are required.")
+            open_dialog("注册不能为空", 100, 50, 300, 200)
+
 
     def loginout(self):
         self.username = ""

@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
 
 
 class Ui_SearchWindow(object):
@@ -104,10 +104,21 @@ class SearchMenu(Ui_SearchWindow):
         super(SearchMenu, self).__init__()
         self.searchwindow=QMainWindow()
         self.setupUi(self.searchwindow)
+        self.center_window()
         self.usernameLabel.setText(username)
         self.conn = db_conn
         # 绑定按钮点击后调用的函数
         self.searchButton.clicked.connect(self.searchFun)
+
+
+    def center_window(self):
+        desktop = QDesktopWidget()
+
+        screen_rect = desktop.screenGeometry()
+        x = (screen_rect.width() - self.searchwindow.width()) // 2
+        y = (screen_rect.height() - self.searchwindow.height()) // 2
+
+        self.searchwindow.move(x, y)
 
 
     def searchFun(self):
