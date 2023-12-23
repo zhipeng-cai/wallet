@@ -8,7 +8,8 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QListWidgetItem
+from dialogutil import open_dialog
 
 
 class Ui_AccountWindow(object):
@@ -73,7 +74,7 @@ class Ui_AccountWindow(object):
         self.addemailButton.setGeometry(QtCore.QRect(590, 310, 89, 25))
         self.addemailButton.setObjectName("addemailButton")
         self.bankLabel = QtWidgets.QLabel(self.centralwidget)
-        self.bankLabel.setGeometry(QtCore.QRect(70, 420, 111, 20))
+        self.bankLabel.setGeometry(QtCore.QRect(70, 420, 300, 20))
         self.bankLabel.setObjectName("bankLabel")
         self.bankList = QtWidgets.QListWidget(self.centralwidget)
         self.bankList.setGeometry(QtCore.QRect(70, 441, 291, 61))
@@ -144,7 +145,7 @@ class Ui_AccountWindow(object):
         self.emailLabel.setText(_translate("AccountWindow", "Email Address:"))
         self.removeemailButton.setText(_translate("AccountWindow", "Remove"))
         self.addemailButton.setText(_translate("AccountWindow", "Add"))
-        self.bankLabel.setText(_translate("AccountWindow", "Bank Account:"))
+        self.bankLabel.setText(_translate("AccountWindow", "Bank Account:[Number](Balance)(Priority)"))
         self.removebankButton.setText(_translate("AccountWindow", "Remove"))
         self.addbankButton.setText(_translate("AccountWindow", "Add"))
         self.backButton.setText(_translate("AccountWindow", "Back"))
@@ -166,14 +167,16 @@ class AccountMenu(Ui_AccountWindow):
         self.conn = db_conn
         cursor = self.conn.cursor()
         login = '''
-            SELECT UserName from User 
+            SELECT UserName, SSN from User 
             WHERE UserID = ?
         '''
         cursor.execute(login, [self.userId])
         uname = cursor.fetchall()
         self.v_username.setText(uname[0][0])
+        self.v_ssn.setText(uname[0][1])
         # 绑定按钮点击后调用的函数
         self.editnameButton.clicked.connect(self.editNameFun)
+        self.editpasswordButton.clicked.connect(self.editPasswordFun)
         self.editssnButton.clicked.connect(self.editSSNFun)
         self.addphoneButton.clicked.connect(self.addPhoneFun)
         self.removephoneButton.clicked.connect(self.removePhoneFun)
@@ -188,19 +191,30 @@ class AccountMenu(Ui_AccountWindow):
                         WHERE UserID = ?
                     ''', [self.userId])
         uphone = cursor.fetchall()
-        print(uphone)
+        for phone_number in uphone:
+            item = QListWidgetItem(str(phone_number[0]))
+            self.phoneList.addItem(item)
+
+
         cursor.execute('''
                                 SELECT Address FROM Email
                                 WHERE UserID = ?
                             ''', [self.userId])
         uemail = cursor.fetchall()
-        print(uemail)
+        for email in uemail:
+            item = QListWidgetItem(str(email[0]))
+            self.emailList.addItem(item)
+
         cursor.execute('''
-                                SELECT AccountNumber FROM UBRelation
-                                WHERE UserID = ?
-                            ''', [self.userId])
+            SELECT BA.AccountNumber, BA.Balance, BA.Priority
+            FROM BankAccount AS BA
+            JOIN UBRelation AS UBR ON BA.AccountNumber = UBR.AccountNumber
+            WHERE UBR.UserID = ?
+        ''', [self.userId])
         ubank = cursor.fetchall()
-        print(ubank)
+        for bank in ubank:
+            item = QListWidgetItem("{}    ({}) ({})".format(bank[0], bank[1], bank[2]))
+            self.bankList.addItem(item)
 
 
     def center_window(self):
@@ -224,7 +238,25 @@ class AccountMenu(Ui_AccountWindow):
                 WHERE UserID = ?
             ''', [value, self.userId])
             self.conn.commit()
+            self.v_username.setText(value)
+            self.usernameInput.clear()
+            open_dialog("修改成功", 125, 50, 300, 200)
         print("editNameFun")
+
+
+    def editPasswordFun(self):
+        value = self.passwordInput.text()
+        if (len(value) > 0):
+            cursor = self.conn.cursor()
+            cursor.execute('''
+                        UPDATE USER
+                        SET PassWord = ?
+                        WHERE UserID = ?
+                    ''', [value, self.userId])
+            self.conn.commit()
+            self.passwordInput.clear()
+            open_dialog("修改成功", 125, 50, 300, 200)
+        print("editPasswordFun")
 
 
     def editSSNFun(self):
@@ -237,6 +269,9 @@ class AccountMenu(Ui_AccountWindow):
                         WHERE UserID = ?
                     ''', [value, self.userId])
             self.conn.commit()
+            self.v_ssn.setText(value)
+            self.ssn_input.clear()
+            open_dialog("修改成功", 125, 50, 300, 200)
         print("editSSNFun")
 
 
@@ -250,11 +285,18 @@ class AccountMenu(Ui_AccountWindow):
                         VALUES (?, ?, 0)
                     ''', [self.userId, value])
             self.conn.commit()
+            self.phoneList.addItem(QListWidgetItem(value))
+            self.phone_input.clear()
+            open_dialog("添加成功", 125, 50, 300, 200)
         print("addPhoneFun")
 
 
     def removePhoneFun(self):
         value = self.phone_input.text()
+        if len(value) == 0:
+            selected_item = self.phoneList.currentItem()
+            if selected_item:
+                value = selected_item.text()
         if (len(value) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''
@@ -262,6 +304,16 @@ class AccountMenu(Ui_AccountWindow):
                                WHERE UserID = ? and Number = ?
                            ''', [self.userId, value])
             self.conn.commit()
+            item_to_remove = None
+            for index in range(self.phoneList.count()):
+                item = self.phoneList.item(index)
+                if item.text() == value:
+                    item_to_remove = item
+                    break
+            if item_to_remove:
+                self.phoneList.takeItem(self.phoneList.row(item_to_remove))
+                self.phone_input.clear()
+                open_dialog("删除成功", 125, 50, 300, 200)
         print("removePhoneFun")
 
 
@@ -274,11 +326,18 @@ class AccountMenu(Ui_AccountWindow):
                                 VALUES (?, ?, 0)
                             ''', [self.userId, value])
             self.conn.commit()
+            self.emailList.addItem(QListWidgetItem(value))
+            self.email_input.clear()
+            open_dialog("添加成功", 125, 50, 300, 200)
         print("addEmailFun")
 
 
     def removeEmailFun(self):
         value = self.email_input.text()
+        if len(value) == 0:
+            selected_item = self.emailList.currentItem()
+            if selected_item:
+                value = selected_item.text()
         if (len(value) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''
@@ -286,33 +345,70 @@ class AccountMenu(Ui_AccountWindow):
                                        WHERE UserID = ? and Address = ?
                                    ''', [self.userId, value])
             self.conn.commit()
+            item_to_remove = None
+            for index in range(self.emailList.count()):
+                item = self.emailList.item(index)
+                if item.text() == value:
+                    item_to_remove = item
+                    break
+            if item_to_remove:
+                self.emailList.takeItem(self.emailList.row(item_to_remove))
+                self.email_input.clear()
+                open_dialog("删除成功", 125, 50, 300, 200)
         print("removeEmailFun")
 
 
     def addBankFuc(self):
-        value = self.banknumber_input.text()
-        if (len(value) > 0):
+        banknumber = self.banknumber_input.text()
+        bankbalance = self.bankbalance_input.text()
+        bankpriority = self.bankpriority_input.text()
+        if (len(banknumber) > 0 and len(bankbalance) > 0 and len(bankpriority) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''
-                            INSERT OR IGNORE INTO BankAccount(AccountNumber, IsVerified)
-                            VALUES (?, 0)
-                            ''', [value])
-            self.conn.commit()
+                            INSERT INTO BankAccount(AccountNumber, Balance, Priority, IsVerified)
+                            VALUES (?, ?, ?, 0)
+                            ''', [banknumber, bankbalance, bankpriority])
             cursor.execute('''
                             INSERT INTO UBRelation(UserID, AccountNumber)
                             VALUES (?, ?)
-                            ''', [self.userId, value])
+                            ''', [self.userId, banknumber])
             self.conn.commit()
+            self.bankList.addItem(QListWidgetItem("{}    ({}) ({})".format(banknumber, bankbalance, bankpriority)))
+            self.banknumber_input.clear()
+            self.bankbalance_input.clear()
+            self.bankpriority_input.clear()
+            open_dialog("添加成功", 125, 50, 300, 200)
         print("addBankFuc")
 
 
     def removeBankFun(self):
-        value = self.bank_input.text()
+        value = self.banknumber_input.text()
+        if len(value) == 0:
+            selected_item = self.bankList.currentItem()
+            if selected_item:
+                value = selected_item.text().split(' ')[0]
         if (len(value) > 0):
+            print(value)
             cursor = self.conn.cursor()
             cursor.execute('''
                                                DELETE FROM UBRelation
                                                WHERE UserID = ? and AccountNumber = ?
                                            ''', [self.userId, value])
+            cursor.execute('''
+                        DELETE FROM BankAccount
+                        WHERE AccountNumber = ?
+                    ''', [value])
             self.conn.commit()
+            item_to_remove = None
+            for index in range(self.bankList.count()):
+                item = self.bankList.item(index)
+                if item.text().split(' ')[0] == value:
+                    item_to_remove = item
+                    break
+            if item_to_remove:
+                self.bankList.takeItem(self.bankList.row(item_to_remove))
+                self.banknumber_input.clear()
+                self.bankbalance_input.clear()
+                self.bankpriority_input.clear()
+                open_dialog("删除成功", 125, 50, 300, 200)
         print("removeBankFun")

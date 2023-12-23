@@ -100,13 +100,21 @@ class Ui_SearchWindow(object):
 
 
 class SearchMenu(Ui_SearchWindow):
-    def __init__(self, username, db_conn):
+    def __init__(self, userId, db_conn):
         super(SearchMenu, self).__init__()
+        self.userId = userId
         self.searchwindow=QMainWindow()
         self.setupUi(self.searchwindow)
         self.center_window()
-        self.usernameLabel.setText(username)
         self.conn = db_conn
+        cursor = self.conn.cursor()
+        login = '''
+                    SELECT UserName from User 
+                    WHERE UserID = ?
+                '''
+        cursor.execute(login, [self.userId])
+        uname = cursor.fetchall()
+        self.usernameLabel.setText(uname[0][0])
         # 绑定按钮点击后调用的函数
         self.searchButton.clicked.connect(self.searchFun)
 

@@ -128,22 +128,22 @@ def insert_init_data(conn):
 
     # Inserting bank account data (each user with their own bank account)
     bank_data = [
-        (1, 1000, 1, 1),  # Bank account for user 'bro', balance 1000, priority 1, and verified
-        (2, 500, 2, 1),  # Bank account for user 'user1', balance 500, priority 2, and verified
-        (3, 800, 3, 0),  # Bank account for user 'user2', balance 800, priority 3, and unverified
-        (4, 700, 4, 1),  # Bank account for user 'user3', balance 700, priority 4, and verified
-        (5, 900, 5, 1)  # Bank account for user 'user4', balance 900, priority 5, and verified
+        (123456, 1000, 1, 1),  # Bank account for user 'bro', balance 1000, priority 1, and verified
+        (234567, 500, 2, 1),  # Bank account for user 'user1', balance 500, priority 2, and verified
+        (345678, 800, 3, 0),  # Bank account for user 'user2', balance 800, priority 3, and unverified
+        (456789, 700, 4, 1),  # Bank account for user 'user3', balance 700, priority 4, and verified
+        (567890, 900, 5, 1)  # Bank account for user 'user4', balance 900, priority 5, and verified
     ]
     cursor.executemany("INSERT INTO BankAccount (AccountNumber, Balance, Priority, IsVerified) VALUES (?, ?, ?, ?)",
                        bank_data)
 
     # Inserting UBRelation data
     ub_relation_data = [
-        (1, 1, 1),  # User 'bro' is associated with their bank account
-        (2, 2, 2),  # User 'user1' is associated with their bank account
-        (3, 3, 3),  # User 'user2' is associated with their bank account
-        (4, 4, 4),  # User 'user3' is associated with their bank account
-        (5, 5, 5)  # User 'user4' is associated with their bank account
+        (1, 1, 123456),  # User 'bro' is associated with their bank account
+        (2, 2, 234567),  # User 'user1' is associated with their bank account
+        (3, 3, 345678),  # User 'user2' is associated with their bank account
+        (4, 4, 456789),  # User 'user3' is associated with their bank account
+        (5, 5, 567890)  # User 'user4' is associated with their bank account
     ]
     cursor.executemany("INSERT INTO UBRelation (UBRelationID, UserID, AccountNumber) VALUES (?, ?, ?)",
                        ub_relation_data)

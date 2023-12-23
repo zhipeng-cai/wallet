@@ -95,7 +95,7 @@ class Main():
         self.main_menu.mainwindow.show()
 
     def toSearchPage(self):
-        self.search_menu = SearchMenu(self.username, self.conn)
+        self.search_menu = SearchMenu(self.userId, self.conn)
         self.search_menu.backButton.clicked.connect(self.backFromSearch)
 
         self.main_menu.mainwindow.close()
@@ -106,7 +106,7 @@ class Main():
         self.main_menu.mainwindow.show()
 
     def toStatementPage(self):
-        self.statement_menu = StatementMenu(self.username, self.conn)
+        self.statement_menu = StatementMenu(self.userId, self.conn)
         self.statement_menu.backButton.clicked.connect(self.backFromStatement)
 
         self.main_menu.mainwindow.close()

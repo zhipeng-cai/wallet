@@ -92,13 +92,21 @@ class Ui_StatementWindow(object):
 
 
 class StatementMenu(Ui_StatementWindow):
-    def __init__(self, username, db_conn):
+    def __init__(self, userId, db_conn):
         super(StatementMenu, self).__init__()
+        self.userId = userId
         self.statementwindow=QMainWindow()
         self.setupUi(self.statementwindow)
         self.center_window()
-        self.usernameLabel.setText(username)
         self.conn = db_conn
+        cursor = self.conn.cursor()
+        login = '''
+                    SELECT UserName from User 
+                    WHERE UserID = ?
+                '''
+        cursor.execute(login, [self.userId])
+        uname = cursor.fetchall()
+        self.usernameLabel.setText(uname[0][0])
         # 绑定按钮点击后调用的函数
         self.searchButton.clicked.connect(self.searchFun)
         # 这个页面还有很多不用点击按钮触发的数据库读写逻辑，需要页面一加载出来就把读取到的指标显示在对应的Label组件上，分别是answe1, answer2, answer3, answer4
