@@ -150,11 +150,20 @@ def insert_init_data(conn):
 
     # Inserting transaction data
     transactions_data = [
-        (1, 1, 'Send', 100.0),  # User 'bro' initiates a payment of 100.0
-        (2, 2, 'Send', 50.0),  # User 'user1' initiates a payment of 50.0
-        (3, 3, 'Send', 75.0),  # User 'user2' initiates a payment of 75.0
-        (4, 4, 'Send', 120.0),  # User 'user3' initiates a payment of 120.0
-        (5, 5, 'Send', 90.0)  # User 'user4' initiates a payment of 90.0
+        (1, 1, 'Send', 50.0),  # User 'bro' initiates a payment of 100.0
+        (2, 2, 'Send', 25.0),  # User 'user1' initiates a payment of 50.0
+        (3, 3, 'Send', 40.0),  # User 'user2' initiates a payment of 75.0
+        (4, 4, 'Send', 60.0),  # User 'user3' initiates a payment of 120.0
+        (5, 5, 'Send', 45.0,),  # User 'user4' initiates a payment of 90.0
+        (6, 2, 'Request', 30.0),  # User 'user1' requests a payment of 30.0
+        (7, 3, 'Request', 20.0),  # User 'user2' requests a payment of 20.0
+        (8, 4, 'Request', 35.0),  # User 'user3' requests a payment of 35.0
+        (9, 5, 'Request', 25.0),  # User 'user4' requests a payment of 25.0
+        (10, 1, 'Send', 70.0),  # User 'bro' initiates a payment of 70.0
+        (11, 2, 'Send', 40.0),  # User 'user1' initiates a payment of 40.0
+        (12, 3, 'Send', 55.0),  # User 'user2' initiates a payment of 55.0
+        (13, 4, 'Send', 80.0),  # User 'user3' initiates a payment of 80.0
+        (14, 5, 'Send', 65.0)  # User 'user4' initiates a payment of 65.0
     ]
     cursor.executemany(
         "INSERT INTO Transactions (TransactionID, InitiatorUserID, Type, TotalAmount) VALUES (?, ?, ?, ?)",
@@ -166,7 +175,16 @@ def insert_init_data(conn):
         (2, 2, 3, 2, 25.0, 'Payment from user1 to user2', datetime.now(), 1),  # Payment from 'user1' to 'user2'
         (3, 3, 4, 3, 40.0, 'Payment from user2 to user3', datetime.now(), 1),  # Payment from 'user2' to 'user3'
         (4, 4, 5, 4, 60.0, 'Payment from user3 to user4', datetime.now(), 1),  # Payment from 'user3' to 'user4'
-        (5, 5, 1, 5, 45.0, 'Payment from user4 to bro', datetime.now(), 1)  # Payment from 'user4' to 'bro'
+        (5, 5, 1, 5, 45.0, 'Payment from user4 to bro', datetime.now(), 1),  # Payment from 'user4' to 'bro'
+        (6, 2, 1, 6, 30.0, 'Request payment from user1', datetime.now(), 1),  # Request payment from 'user1' by 'user2'
+        (7, 3, 2, 7, 20.0, 'Request payment from user2', datetime.now(), 1),  # Request payment from 'user2' by 'user3'
+        (8, 4, 3, 8, 35.0, 'Request payment from user3', datetime.now(), 1),  # Request payment from 'user3' by 'user4'
+        (9, 5, 4, 9, 25.0, 'Request payment from user4', datetime.now(), 1),  # Request payment from 'user4' by 'bro'
+        (10, 1, 2, 10, 70.0, 'Payment from bro to user1', datetime.now(), 1),  # Payment from 'bro' to 'user1'
+        (11, 2, 3, 11, 40.0, 'Payment from user1 to user2', datetime.now(), 1),  # Payment from 'user1' to 'user2'
+        (12, 3, 4, 12, 55.0, 'Payment from user2 to user3', datetime.now(), 1),  # Payment from 'user2' to 'user3'
+        (13, 4, 5, 13, 80.0, 'Payment from user3 to user4', datetime.now(), 1),  # Payment from 'user3' to 'user4'
+        (14, 5, 1, 14, 65.0, 'Payment from user4 to bro', datetime.now(), 1)  # Payment from 'user4' to 'bro'
     ]
     cursor.executemany(
         "INSERT INTO Payment (PaymentID, SenderUserID, ReceiverUserID, TransactionID, Amount, Memo, PayTime, IsSuccessful) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
