@@ -80,6 +80,7 @@ class Main():
         self.password = ""
         self.login_menu.usernameInput.clear()
         self.login_menu.passwordInput.clear()
+        self.main_menu.clear()
         self.main_menu.mainwindow.close()
         self.login_menu.loginwindow.show()
 
@@ -87,6 +88,7 @@ class Main():
         self.account_menu = AccountMenu(self.userId, self.conn)
         self.account_menu.backButton.clicked.connect(self.backFromAccount)
 
+        self.main_menu.clear()
         self.main_menu.mainwindow.close()
         self.account_menu.accountwindow.show()
 
@@ -98,6 +100,7 @@ class Main():
         self.search_menu = SearchMenu(self.userId, self.conn)
         self.search_menu.backButton.clicked.connect(self.backFromSearch)
 
+        self.main_menu.clear()
         self.main_menu.mainwindow.close()
         self.search_menu.searchwindow.show()
 
@@ -109,6 +112,7 @@ class Main():
         self.statement_menu = StatementMenu(self.userId, self.conn)
         self.statement_menu.backButton.clicked.connect(self.backFromStatement)
 
+        self.main_menu.clear()
         self.main_menu.mainwindow.close()
         self.statement_menu.statementwindow.show()
 

@@ -5,10 +5,12 @@
 # Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
-
+from datetime import datetime
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QDesktopWidget
+
+from dialogutil import open_dialog
 
 
 class Ui_MainWindow(object):
@@ -124,18 +126,201 @@ class MainMenu(Ui_MainWindow):
     # 在下面编写按钮点击处理逻辑
     def sendMoneyFun(self):
         # 获取文本输入框的值 输入文本框是QLineEdit对象
-        people = self.sendPhone.text()
-        money = self.sendMoney.text()
-        print(people)
-        print(money)
+        phoneOrEmail = self.sendPhone.text()
+        money_input = self.sendMoney.text()
+
+        if not phoneOrEmail:
+            open_dialog("用户不能为空", 100, 50, 300, 200)
+            print("Phone or email cannot be empty.")
+            return
+
+        try:
+            money = int(money_input) if money_input else 0
+        except ValueError:
+            open_dialog("请输入有效金额", 100, 50, 300, 200)
+            print("Invalid money input. Please enter a valid number.")
+            return
         # 读取数据, call conn.commit() if make any changes to the database
         cursor = self.conn.cursor()
-        # cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        # Step 1: Get the sender's information. i.e., self.userId
+        sender_id = self.userId
 
-        # conn.commit()  # 如果是写数据库的话记得调用这个
+        # Step 2: Determine the receiver's information based on phoneOrEmail
+        cursor.execute(
+            "SELECT UserID FROM User WHERE UserID IN (SELECT UserID FROM Email WHERE Address = ? OR UserID IN (SELECT UserID FROM Phone WHERE Number = ?))",
+            (phoneOrEmail, phoneOrEmail))
+        receiver_info = cursor.fetchone()
+
+        if receiver_info is None:
+            open_dialog("用户不存在", 125, 50, 300, 200)
+            print("Receiver not found.")
+            return
+
+        receiver_id = receiver_info[0]
+
+        # Step 3: Check the sender's bank accounts in priority order
+        cursor.execute("""
+            SELECT UBRelation.UserID, UBRelation.AccountNumber, BankAccount.Balance
+            FROM UBRelation
+            JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+            WHERE UBRelation.UserID = ?
+            ORDER BY BankAccount.Priority
+        """, (sender_id,))
+
+        user_banks = cursor.fetchall()
+
+        for user_bank in user_banks:
+            _, account_number, balance = user_bank
+
+            if balance >= money:  # Check if the account balance is enough
+                # Step 4: Create a new transaction record
+                cursor.execute("""
+                    INSERT INTO Transactions (InitiatorUserID, Type, TotalAmount)
+                    VALUES (?, ?, ?)
+                """, (sender_id, 'Send', money))
+
+                transaction_id = cursor.lastrowid
+
+                # Step 5: Create a new payment record
+                cursor.execute("""
+                    INSERT INTO Payment (SenderUserID, ReceiverUserID, TransactionID, Amount, Memo, PayTime, IsSuccessful)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (sender_id, receiver_id, transaction_id, money,
+                      f"Payment from {sender_id} to {receiver_id}", datetime.now(), 1))
+
+                # Step 6: Update sender's bank account balance
+                cursor.execute("""
+                                UPDATE BankAccount
+                                SET Balance = Balance - ?
+                                WHERE AccountNumber = ?
+                            """, (money, account_number))
+
+                # Step 7: Update receiver's bank account balance (using the bank account with the highest priority)
+                cursor.execute("""
+                    UPDATE BankAccount
+                    SET Balance = Balance + ?
+                    WHERE AccountNumber = (
+                        SELECT BankAccount.AccountNumber
+                        FROM UBRelation
+                        JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+                        WHERE UBRelation.UserID = ?
+                        ORDER BY BankAccount.Priority DESC
+                        LIMIT 1
+                    )
+                """, (money, receiver_id))
+                # Commit the changes
+                self.conn.commit()
+                open_dialog("转账成功", 125, 50, 300, 200)
+                print(f"Transaction successful! {money} sent from {sender_id} to {receiver_id} using account {account_number}")
+                return
+
+        open_dialog("余额不足", 125, 50, 300, 200)
+        print("No suitable bank account found with enough balance.")
         print("sendMoney")
 
-
     def requestMoneyFun(self):
+        # Get values from text input boxes (QLineEdit objects)
+        phoneOrEmail = self.requestPhone.text()
+        money_input = self.requestMoney.text()
 
+        if not phoneOrEmail:
+            open_dialog("用户不能为空", 100, 50, 300, 200)
+            print("Phone or email cannot be empty.")
+            return
+
+        try:
+            money = int(money_input) if money_input else 0
+        except ValueError:
+            open_dialog("请输入有效金额", 100, 50, 300, 200)
+            print("Invalid money input. Please enter a valid number.")
+            return
+
+        # Read data, call conn.commit() if there are any changes to the database
+        cursor = self.conn.cursor()
+
+        # Step 1: Get the receiver's information, i.e., self.userId
+        receiver_id = self.userId
+
+        # Step 2: Determine the sender's information based on phoneOrEmail
+        cursor.execute("""
+            SELECT UserID
+            FROM User
+            WHERE UserID IN (SELECT UserID FROM Email WHERE Address = ? OR UserID IN (SELECT UserID FROM Phone WHERE Number = ?))
+        """, (phoneOrEmail, phoneOrEmail))
+        sender_info = cursor.fetchone()
+
+        if sender_info is None:
+            open_dialog("用户不存在", 125, 50, 300, 200)
+            print("Sender not found.")
+            return
+
+        sender_id = sender_info[0]
+
+        # Step 3: Check the sender's bank accounts in priority order
+        cursor.execute("""
+            SELECT UBRelation.UserID, UBRelation.AccountNumber, BankAccount.Balance, BankAccount.Priority
+            FROM UBRelation
+            JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+            WHERE UBRelation.UserID = ?
+            ORDER BY BankAccount.Priority
+        """, (sender_id,))
+
+        user_banks = cursor.fetchall()
+
+        for user_bank in user_banks:
+            _, account_number, balance, priority = user_bank
+
+            if balance >= money:  # Check if the account balance is enough
+                # Step 4: Update sender's bank account balance
+                cursor.execute("""
+                    UPDATE BankAccount
+                    SET Balance = Balance - ?
+                    WHERE AccountNumber = ?
+                """, (money, account_number))
+
+                # Step 5: Update receiver's bank account balance (using the bank account with the highest priority)
+                cursor.execute("""
+                    UPDATE BankAccount
+                    SET Balance = Balance + ?
+                    WHERE AccountNumber = (
+                        SELECT BankAccount.AccountNumber
+                        FROM UBRelation
+                        JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+                        WHERE UBRelation.UserID = ?
+                        ORDER BY BankAccount.Priority DESC
+                        LIMIT 1
+                    )
+                """, (money, receiver_id))
+
+                # Step 6: Create a new transaction record
+                cursor.execute("""
+                    INSERT INTO Transactions (InitiatorUserID, Type, TotalAmount)
+                    VALUES (?, ?, ?)
+                """, (receiver_id, 'Request', money))
+
+                transaction_id = cursor.lastrowid
+
+                # Step 7: Create a new payment record
+                cursor.execute("""
+                    INSERT INTO Payment (SenderUserID, ReceiverUserID, TransactionID, Amount, Memo, PayTime, IsSuccessful)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (sender_id, receiver_id, transaction_id, money,
+                      f"Payment from {sender_id} to {receiver_id}", datetime.now(), 1))
+
+                # Commit the changes
+                self.conn.commit()
+                open_dialog("请求成功", 125, 50, 300, 200)
+                print(
+                    f"Request successful! {money} requested by {receiver_id} from {sender_id} using account {account_number}")
+                return
+
+        open_dialog("对方余额不足", 100, 50, 300, 200)
+        print("No suitable bank account found with enough balance.")
         print("requestMoney")
+
+
+    def clear(self):
+        self.sendPhone.clear()
+        self.sendMoney.clear()
+        self.requestPhone.clear()
+        self.requestMoney.clear()
