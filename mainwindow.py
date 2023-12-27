@@ -145,18 +145,20 @@ class MainMenu(Ui_MainWindow):
         # Step 1: Get the sender's information. i.e., self.userId
         sender_id = self.userId
 
+        sendType = 1
+
         # Step 2: Determine the receiver's information based on phoneOrEmail
         cursor.execute(
             "SELECT UserID FROM User WHERE UserID IN (SELECT UserID FROM Email WHERE Address = ? OR UserID IN (SELECT UserID FROM Phone WHERE Number = ?))",
             (phoneOrEmail, phoneOrEmail))
         receiver_info = cursor.fetchone()
 
-        if receiver_info is None:
-            open_dialog("用户不存在", 125, 50, 300, 200)
-            print("Receiver not found.")
-            return
+        receiver_id = sender_id
 
-        receiver_id = receiver_info[0]
+        if receiver_info is None:
+            sendType = 2
+        else:
+            receiver_id = receiver_info[0]
 
         # Step 3: Check the sender's bank accounts in priority order
         cursor.execute("""
@@ -180,6 +182,22 @@ class MainMenu(Ui_MainWindow):
                 """, (sender_id, 'Send', money))
 
                 transaction_id = cursor.lastrowid
+
+                if sendType == 2:
+                    cursor.execute("""
+                                        INSERT INTO Payment (SenderUserID, ReceiverUserID, TransactionID, Amount, Memo, PayTime, IsSuccessful)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                                    """, (sender_id, receiver_id, transaction_id, money,
+                                          f"{phoneOrEmail}", datetime.now(), 2))
+                    cursor.execute("""
+                                                    UPDATE BankAccount
+                                                    SET Balance = Balance - ?
+                                                    WHERE AccountNumber = ?
+                                                """, (money, account_number))
+                    self.conn.commit()
+                    open_dialog("转账成功", 125, 50, 300, 200)
+                    print(f"Transaction successful! {money} sent from {sender_id} to new user using account {account_number}")
+                    return
 
                 # Step 5: Create a new payment record
                 cursor.execute("""
@@ -261,8 +279,7 @@ class MainMenu(Ui_MainWindow):
             SELECT UBRelation.UserID, UBRelation.AccountNumber, BankAccount.Balance, BankAccount.Priority
             FROM UBRelation
             JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
-            WHERE UBRelation.UserID = ?
-            ORDER BY BankAccount.Priority
+            WHERE UBRelation.UserID = ? AND BankAccount.Priority = -1
         """, (sender_id,))
 
         user_banks = cursor.fetchall()

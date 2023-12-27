@@ -281,6 +281,35 @@ class AccountMenu(Ui_AccountWindow):
         if (len(value) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''
+                        SELECT SUM(Amount) FROM Payment
+                        WHERE IsSuccessful = 2 AND Memo = ?
+                    ''', [value])
+            results = cursor.fetchall()
+            if(len(results) > 0 and (not results[0][0] is None)):
+                cursor.execute("""
+                            SELECT BankAccount.AccountNumber
+                            FROM UBRelation
+                            JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+                            WHERE UBRelation.UserID = ?
+                            ORDER BY BankAccount.Priority DESC
+                            LIMIT 1
+                        """, (self.userId,))
+                user_banks = cursor.fetchall()
+                if(len(user_banks) == 0):
+                    open_dialog("无效账号", 125, 50, 300, 200)
+                    return
+                cursor.execute("""
+                                    UPDATE BankAccount
+                                    SET Balance = Balance + ?
+                                    WHERE AccountNumber = ?
+                                """, (results[0][0], user_banks[0][0]))
+                cursor.execute('''
+                                        UPDATE Payment
+                                        SET IsSuccessful = 1 
+                                        WHERE IsSuccessful = 2 AND Memo = ?
+                                    ''', [value])
+
+            cursor.execute('''
                         INSERT INTO Phone(UserID, Number, IsVerified)
                         VALUES (?, ?, 0)
                     ''', [self.userId, value])
@@ -321,6 +350,35 @@ class AccountMenu(Ui_AccountWindow):
         value = self.email_input.text()
         if (len(value) > 0):
             cursor = self.conn.cursor()
+            cursor.execute('''
+                                    SELECT SUM(Amount) FROM Payment
+                                    WHERE IsSuccessful = 2 AND Memo = ?
+                                ''', [value])
+            results = cursor.fetchall()
+            if (len(results) > 0 and (not results[0][0] is None)):
+                cursor.execute("""
+                                        SELECT BankAccount.AccountNumber
+                                        FROM UBRelation
+                                        JOIN BankAccount ON UBRelation.AccountNumber = BankAccount.AccountNumber
+                                        WHERE UBRelation.UserID = ?
+                                        ORDER BY BankAccount.Priority DESC
+                                        LIMIT 1
+                                    """, (self.userId,))
+                user_banks = cursor.fetchall()
+                if (len(user_banks) == 0):
+                    open_dialog("无效账号", 125, 50, 300, 200)
+                    return
+                cursor.execute("""
+                                                UPDATE BankAccount
+                                                SET Balance = Balance + ?
+                                                WHERE AccountNumber = ?
+                                            """, (results[0][0], user_banks[0][0]))
+                cursor.execute('''
+                                                    UPDATE Payment
+                                                    SET IsSuccessful = 1 
+                                                    WHERE IsSuccessful = 2 AND Memo = ?
+                                                ''', [value])
+
             cursor.execute('''
                                 INSERT INTO Email(UserID, Address, IsVerified)
                                 VALUES (?, ?, 0)
@@ -365,7 +423,7 @@ class AccountMenu(Ui_AccountWindow):
         if (len(banknumber) > 0 and len(bankbalance) > 0 and len(bankpriority) > 0):
             cursor = self.conn.cursor()
             cursor.execute('''
-                            INSERT INTO BankAccount(AccountNumber, Balance, Priority, IsVerified)
+                            INSERT OR IGNORE INTO BankAccount(AccountNumber, Balance, Priority, IsVerified)
                             VALUES (?, ?, ?, 0)
                             ''', [banknumber, bankbalance, bankpriority])
             cursor.execute('''
@@ -394,10 +452,6 @@ class AccountMenu(Ui_AccountWindow):
                                                DELETE FROM UBRelation
                                                WHERE UserID = ? and AccountNumber = ?
                                            ''', [self.userId, value])
-            cursor.execute('''
-                        DELETE FROM BankAccount
-                        WHERE AccountNumber = ?
-                    ''', [value])
             self.conn.commit()
             item_to_remove = None
             for index in range(self.bankList.count()):
